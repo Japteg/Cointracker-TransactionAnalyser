@@ -1,1 +1,1 @@
-# Cointracker-TransactionAnalyser
+# Ethereum Transaction Analyzer
