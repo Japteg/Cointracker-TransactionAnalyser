@@ -1,19 +1,3 @@
-#!/usr/bin/env python3
-"""
-Ethereum Transaction Analyzer
-============================
-
-A comprehensive tool for fetching, analyzing, and exporting Ethereum wallet transaction history.
-
-Features:
-- Fetches all transaction types (Normal, Internal, ERC-20, ERC-721, ERC-1155)
-- Categorizes and processes transaction data
-- Exports to CSV with all required fields
-- Comprehensive error handling and logging
-- Rate limiting and API management
-- Extensible architecture
-"""
-
 import argparse
 import sys
 import logging

@@ -67,9 +67,6 @@ class EtherscanApiClient(ExternalDataProviderBaseClient):
             # Start block for the next batch
             start_block = last_block_number + 1
             batch_number += 1
-        print(
-            f"---- Completed fetching transactions of type: {transaction_type.upper()}, Fetched {len(transactions)} transactions ----"
-        )
         return transactions
 
     def get_all_transactions(
