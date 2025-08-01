@@ -45,7 +45,7 @@ class EthereumTransactionAnalyzer(BaseTransactionAnalyzer):
             if transaction_type == "ETH Transfer"
             else tx.get("tokenSymbol", ""),
             asset_name=tx.get("tokenName", ""),
-            token_id="",  # Not applicable for ETH
+            token_id=tx.get("tokenID", ""),
             value_amount_eth=convert_wei_to_eth(tx.get("value", "0")),
             gas=tx.get("gas", "0"),
             gas_price=tx.get("gasPrice", "0"),
