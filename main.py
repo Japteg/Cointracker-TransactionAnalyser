@@ -36,34 +36,34 @@ def validate_ethereum_address(address: str) -> bool:
     """Validate Ethereum address format."""
     if not address:
         return False
-    
+
     # Check if it starts with 0x prefix
-    if not (address.startswith('0x') or address.startswith('0X')):
+    if not (address.startswith("0x") or address.startswith("0X")):
         return False
-    
+
     # Remove 0x prefix for validation
     hex_part = address[2:]
-    
+
     # Check if it's 40 characters long and contains only hex characters
-    return len(hex_part) == 40 and bool(re.match(r'^[0-9a-fA-F]+$', hex_part))
+    return len(hex_part) == 40 and bool(re.match(r"^[0-9a-fA-F]+$", hex_part))
 
 
 def main():
     """Main entry point for the transaction analyzer."""
-    
+
     # Set up command line argument parser
     parser = argparse.ArgumentParser(
-        description='Ethereum Transaction Analyzer - Fetch, analyze, and export wallet transaction history'
+        description="Ethereum Transaction Analyzer - Fetch, analyze, and export wallet transaction history"
     )
     parser.add_argument(
-        '--address',
+        "--address",
         required=True,
-        help='Ethereum wallet address to analyze (must include 0x prefix)'
+        help="Ethereum wallet address to analyze (must include 0x prefix)",
     )
-    
+
     # Parse command line arguments
     args = parser.parse_args()
-    
+
     # Validate the address
     if not validate_ethereum_address(args.address):
         print(f"Error: Invalid Ethereum address '{args.address}'")
@@ -75,12 +75,12 @@ def main():
         config.setup_logging()
 
         logger.info(f"Starting transaction analysis for address: {args.address}")
-        
+
         logger.info("Initializing Etherscan API client...")
-        etherscan_client = EtherscanApiClient(config.config['etherscan']['api_key'])
+        etherscan_client = EtherscanApiClient(config.config["etherscan"]["api_key"])
 
         raw_data = etherscan_client.get_all_transactions(address=args.address)
-        
+
         logger.info("Initializing transaction analyzer...")
         analyzer = EthereumTransactionAnalyzer()
         processed_transactions = analyzer.analyze(raw_data)
@@ -88,17 +88,17 @@ def main():
         logger.info("Initializing CSV exporter...")
         exporter = CSVExporter()
         export_path = exporter.export(processed_transactions.model_dump(), args.address)
-        
+
         print(f"\nTransactions exported to: {export_path}")
         logger.info("Transaction analysis completed successfully")
         return 0
-        
+
     except Exception as e:
         logger.error(f"Error during transaction analysis: {str(e)}")
         print(f"Error: {str(e)}")
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit_code = main()
-    sys.exit(exit_code) 
+    sys.exit(exit_code)
