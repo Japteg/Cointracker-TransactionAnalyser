@@ -1,7 +1,8 @@
 from typing import List, Dict, Any
 import logging
-from .external_data_provider_base_client import ExternalDataProviderBaseClient
 from api_client import ApiClient
+from domain_models import EthereumTransactionType
+from external_data_providers.external_data_provider_base_client import ExternalDataProviderBaseClient
 
 logger = logging.getLogger(__name__)
 
@@ -10,26 +11,25 @@ class EtherscanApiClient(ExternalDataProviderBaseClient):
     """Etherscan API client for fetching Ethereum transaction data."""
     
     BASE_URL = "https://api.etherscan.io/api"
-    RATE_LIMIT_DELAY = 0.2  # 5 requests per second max for free tier
 
     TRANSACTION_ACTIONS = {
-        'normal': 'txlist',
-        'internal': 'txlistinternal',
-        'erc20': 'tokentx',
-        'erc721': 'tokennfttx',
-        'erc1155': 'token1155tx'
+        EthereumTransactionType.ERC20.value: 'tokentx',
+        EthereumTransactionType.ERC721.value: 'tokennfttx',
+        EthereumTransactionType.ERC1155.value: 'token1155tx',
+        EthereumTransactionType.NORMAL.value: 'txlist',
+        EthereumTransactionType.INTERNAL.value: 'txlistinternal',
     }
     
     def __init__(self, api_key: str):
         super().__init__(api_key)
         self.api_client = ApiClient()
     
-    def _get_transactions(self, address: str, action: str, page: int = 1, offset: int = 10000, sort: str = 'asc') -> List[Dict[str, Any]]:
+    def _get_transactions(self, address: str, action: str, transaction_type: str, page: int = 1, offset: int = 10000, sort: str = 'asc') -> List[Dict[str, Any]]:
         transactions = []
         start_block = 0
         batch_number = 1
         while True:
-            print(f"---- Fetching batch {batch_number} of transactions for {address}, action: {action} ----")
+            print(f"---- Transaction type: {transaction_type.upper()}, Fetching batch {batch_number} of transactions for {address} ----")
             params = {
                 'module': 'account',
                 'action': action,
@@ -55,6 +55,7 @@ class EtherscanApiClient(ExternalDataProviderBaseClient):
             # Start block for the next batch
             start_block = last_block_number + 1
             batch_number += 1
+        print(f"---- Completed fetching transactions of type: {transaction_type.upper()}, Fetched {len(transactions)} transactions ----")
         return transactions
     
     def get_all_transactions(self, address: str, max_transactions: int = 10000) -> Dict[str, List[Dict[str, Any]]]:
@@ -64,8 +65,8 @@ class EtherscanApiClient(ExternalDataProviderBaseClient):
         try:
             results = {}
 
-            for action, action_param in self.TRANSACTION_ACTIONS.items():
-                results[action] = self._get_transactions(address, action_param)
+            for txn_type, action in self.TRANSACTION_ACTIONS.items():
+                results[txn_type] = self._get_transactions(address, action, txn_type)
             
             total_txns = sum(len(txns) for txns in results.values())
             logger.info(f"Successfully fetched {total_txns} total transactions")

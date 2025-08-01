@@ -19,10 +19,11 @@ class CSVExporter(DataExporterBase):
         'from_address',
         'to_address',
         'transaction_type',
-        'asset_contract_address',
-        'asset_symbol_name',
+        'contract_address',
+        'asset_symbol',
+        'asset_name',
         'token_id',
-        'value_amount',
+        'value_amount_eth',
         'gas_fee_eth'
     ]
 
@@ -46,7 +47,7 @@ class CSVExporter(DataExporterBase):
         full_path = os.path.join(output_directory_path, filename)
         
         try:
-            # Convert to DataFrame for easier manipulation
+            # Convert to DataFrame
             df = pd.DataFrame(validated_transactions)
             
             # Ensure columns are in the correct order

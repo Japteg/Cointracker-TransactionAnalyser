@@ -87,7 +87,7 @@ def main():
 
         logger.info("Initializing CSV exporter...")
         exporter = CSVExporter()
-        export_path = exporter.export(processed_transactions, args.address)
+        export_path = exporter.export(processed_transactions.model_dump(), args.address)
         
         print(f"\nTransactions exported to: {export_path}")
         logger.info("Transaction analysis completed successfully")
