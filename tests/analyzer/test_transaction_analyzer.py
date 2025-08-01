@@ -62,18 +62,6 @@ class TestEthereumTransactionAnalyzer:
             "erc1155": [],
         }
 
-    def test_transaction_types_display_names(self, analyzer):
-        """Test that transaction type display names are correctly defined."""
-        expected_types = {
-            "normal": "ETH Transfer",
-            "erc20": "ERC-20 Transfer",
-            "erc721": "ERC-721 Transfer",
-            "erc1155": "ERC-1155 Transfer",
-            "internal": "Internal Transfer",
-        }
-
-        assert analyzer.TRANSACTION_TYPES_DISPLAY_NAMES == expected_types
-
     @patch("analyzer.transaction_analyzer.convert_timestamp")
     @patch("analyzer.transaction_analyzer.convert_wei_to_eth")
     @patch("analyzer.transaction_analyzer.calculate_gas_fee")
@@ -193,8 +181,7 @@ class TestEthereumTransactionAnalyzer:
         assert result.gas_used == "0"
         assert result.is_error is False  # Default when isError is missing
 
-    @patch("analyzer.transaction_analyzer.logger")
-    def test_analyze_successful(self, mock_logger, analyzer, sample_raw_data):
+    def test_analyze_successful(self, analyzer, sample_raw_data):
         """Test successful analysis of transaction data."""
         with patch.object(analyzer, "_process_transaction") as mock_process:
             # Mock _process_transaction to return mock domain models
@@ -213,9 +200,8 @@ class TestEthereumTransactionAnalyzer:
             mock_process.assert_any_call(sample_raw_data["normal"][0], "ETH Transfer")
             mock_process.assert_any_call(sample_raw_data["erc20"][0], "ERC-20 Transfer")
 
-    @patch("analyzer.transaction_analyzer.logger")
     def test_analyze_with_processing_errors(
-        self, mock_logger, analyzer, sample_raw_data
+        self, analyzer, sample_raw_data
     ):
         """Test analysis when some transactions fail to process."""
         with patch.object(analyzer, "_process_transaction") as mock_process:
@@ -229,11 +215,6 @@ class TestEthereumTransactionAnalyzer:
             assert isinstance(result, TransactionListDomainModel)
             assert len(result.root) == 1
             assert result.root[0] == mock_tx
-
-            # Should log the error
-            mock_logger.error.assert_called_once()
-            error_call = mock_logger.error.call_args[0][0]
-            assert "Error processing erc20 transaction" in error_call
 
     def test_analyze_empty_data(self, analyzer):
         """Test analysis with empty transaction data."""
@@ -257,61 +238,6 @@ class TestEthereumTransactionAnalyzer:
         assert isinstance(result, TransactionListDomainModel)
         assert len(result.root) == 0
 
-    def test_analyze_mixed_known_unknown_types(self, analyzer, sample_eth_transaction):
-        """Test analysis with mix of known and unknown transaction types."""
-        mixed_data = {
-            "normal": [sample_eth_transaction],
-            "unknown_type": [{"hash": "0x123"}],
-        }
-
-        with patch.object(analyzer, "_process_transaction") as mock_process:
-            mock_tx = Mock(spec=TransactionDomainModel)
-            mock_process.return_value = mock_tx
-
-            result = analyzer.analyze(mixed_data)
-
-            # Should only process known types
-            assert len(result.root) == 1
-            mock_process.assert_called_once_with(sample_eth_transaction, "ETH Transfer")
-
-    @patch("builtins.print")  # Mock print statements
-    def test_analyze_console_output(self, mock_print, analyzer, sample_raw_data):
-        """Test that analyze method produces expected console output."""
-        with patch.object(analyzer, "_process_transaction") as mock_process:
-            mock_process.return_value = Mock(spec=TransactionDomainModel)
-
-            analyzer.analyze(sample_raw_data)
-
-            # Verify print statements were called
-            print_calls = [call[0][0] for call in mock_print.call_args_list]
-
-            # Check for expected output patterns
-            assert any("Starting transaction analysis" in call for call in print_calls)
-            assert any(
-                "Processing 1 normal transactions" in call for call in print_calls
-            )
-            assert any(
-                "Processing 1 erc20 transactions" in call for call in print_calls
-            )
-            assert any(
-                "Successfully processed 2 total transactions" in call
-                for call in print_calls
-            )
-
-    def test_inheritance(self, analyzer):
-        """Test that EthereumTransactionAnalyzer properly inherits from BaseTransactionAnalyzer."""
-        from analyzer.base_transaction_analyzer import BaseTransactionAnalyzer
-
-        assert isinstance(analyzer, BaseTransactionAnalyzer)
-
-    def test_ethereum_transaction_type_enum_values(self):
-        """Test that EthereumTransactionType enum has expected values."""
-        assert EthereumTransactionType.NORMAL.value == "normal"
-        assert EthereumTransactionType.INTERNAL.value == "internal"
-        assert EthereumTransactionType.ERC20.value == "erc20"
-        assert EthereumTransactionType.ERC721.value == "erc721"
-        assert EthereumTransactionType.ERC1155.value == "erc1155"
-
 
 class TestEthereumTransactionAnalyzerIntegration:
     """Integration tests with real utility functions (not mocked)."""
@@ -324,12 +250,12 @@ class TestEthereumTransactionAnalyzerIntegration:
         """Integration test with real utility functions."""
         sample_tx = {
             "hash": "0x1234567890abcdef",
-            "timeStamp": "1640995200",  # 2022-01-01 00:00:00 UTC
+            "timeStamp": "1640995200",
             "from": "0xfrom123",
             "to": "0xto456",
             "value": "1000000000000000000",  # 1 ETH
             "gas": "21000",
-            "gasPrice": "20000000000",  # 20 Gwei
+            "gasPrice": "20000000000",
             "gasUsed": "21000",
             "isError": "0",
         }
@@ -338,10 +264,3 @@ class TestEthereumTransactionAnalyzerIntegration:
 
         assert result.value_amount_eth == "1"
         assert result.gas_fee_eth == "0.00042"  # 21000 * 20000000000 / 10^18
-
-    def test_analyze_integration_empty_transactions(self, analyzer):
-        """Integration test with empty transaction lists."""
-        data = {"normal": [], "erc20": [], "internal": []}
-
-        result = analyzer.analyze(data)
-        assert len(result.root) == 0

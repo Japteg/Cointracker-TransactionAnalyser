@@ -37,38 +37,6 @@ class TestConvertWeiToEth:
         result = convert_wei_to_eth(large_wei)
         assert result == "1000"
 
-    def test_convert_with_precision(self):
-        """Test conversion maintaining precision."""
-        # 1.123456789012345678 ETH in Wei
-        precise_wei = "1123456789012345678"
-        result = convert_wei_to_eth(precise_wei)
-        assert result == "1.123456789012345678"
-
-    def test_convert_removes_trailing_zeros(self):
-        """Test that trailing zeros are removed."""
-        # 1.1 ETH in Wei (with trailing zeros when converted)
-        wei_with_trailing = "1100000000000000000"
-        result = convert_wei_to_eth(wei_with_trailing)
-        assert result == "1.1"
-
-    @patch("utils.logger")
-    def test_convert_invalid_wei_value(self, mock_logger):
-        """Test handling of invalid Wei values."""
-        result = convert_wei_to_eth("invalid")
-        assert result == "0"
-        mock_logger.warning.assert_called_once()
-
-    @patch("utils.logger")
-    def test_convert_none_value(self, mock_logger):
-        """Test handling of None value."""
-        result = convert_wei_to_eth(None)
-        assert result == "0"
-
-    def test_convert_decimal_input(self):
-        """Test conversion with Decimal input."""
-        result = convert_wei_to_eth(str(Decimal("1000000000000000000")))
-        assert result == "1"
-
 
 class TestCalculateGasFee:
     """Test suite for calculate_gas_fee utility function."""

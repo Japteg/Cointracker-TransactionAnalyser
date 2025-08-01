@@ -53,11 +53,11 @@ The Ethereum Transaction Analyzer follows a modular, extensible architecture des
 
 ### API Batching Strategy
 
-The system implements sophisticated API batching to efficiently handle large transaction histories:
+The system implements API pagination to efficiently handle large transaction histories:
 
 #### 1. **Multi-Type Fetching**
 ```python
-# Fetches each transaction type in separate API calls
+# Fetches data for each transaction type
 TRANSACTION_TYPES = {
     'normal': 'txlist',           # Regular ETH transfers
     'internal': 'txlistinternal', # Internal transactions
@@ -78,8 +78,22 @@ Batch 2: Block N+1 → Block M (10,000 transactions)
 Batch 3: Block M+1 → Block X (< 10,000 transactions) → STOP
 ```
 
+#### 4. **Extensible Architecture**
 
-## 📋 Prerequisites
+**Strategy Pattern Implementation:**
+- **Multiple Analyzers**: `BaseTransactionAnalyzer` allows different blockchain analysis strategies (Ethereum, Bitcoin, etc.)
+- **Export Strategies**: `DataExporterBase` enables multiple output formats (CSV, JSON, Database) through interchangeable exporters
+- **API Providers**: `ExternalDataProviderBaseClient` supports different data sources (Etherscan, Alchemy, Infura) with consistent interface
+
+(P.S: Not all methods are implemented but it is coded keeping future scenarios in mind)
+
+**Interface Segregation Principle:**
+- **Focused Interfaces**: Separate base classes for analysis, export, and data fetching rather than monolithic interface
+- **Single Responsibility**: Each component handles one concern - analyzers process, exporters format, providers fetch
+- **Clean Dependencies**: Components depend only on interfaces they actually use, enabling easy testing and extension
+
+
+## Prerequisites
 
 - **Python**: 3.10
 - **Etherscan API Key**: Free API key from [Etherscan.io](https://etherscan.io/apis)
@@ -120,7 +134,7 @@ python main.py --help
 
 You should see the help message with available options.
 
-## 🚀 Usage
+## Usage
 
 ### Basic Usage
 ```bash
@@ -161,7 +175,29 @@ Export summary for 0x742d35Cc6634C0532925a3b8D698Ac2160c85609:
 Transactions exported to: ./transaction_reports/eth_transactions_0x742d...85609_20240110_162230.csv
 ```
 
-## 📁 Project Structure
+## Docker Usage
+
+### Build Docker Image
+```bash
+docker build -t ethereum-analyzer .
+```
+
+### Run in Interactive Mode
+```bash
+# Run container with interactive shell access
+docker run -it -e ETHERSCAN_API_KEY="your_api_key_here" \
+  -v $(pwd)/transaction_reports:/app/transaction_reports \
+  -v $(pwd)/logs:/app/logs \
+  ethereum-analyzer /bin/bash
+```
+
+### Inside Container - Run the script
+```bash
+# Once inside the container, run your analysis
+python main.py --address 0x742d35Cc6634C0532925a3b8D698Ac2160c85609
+```
+
+## Project Structure
 
 ```
 ethereum-transaction-analyzer/
@@ -203,7 +239,7 @@ ethereum-transaction-analyzer/
 ├── api_client.py                      # HTTP client wrapper
 ```
 
-## 🧪 Testing
+## Testing
 
 The project includes a comprehensive test suite with both unit and integration tests.
 
@@ -212,7 +248,7 @@ The project includes a comprehensive test suite with both unit and integration t
 pytest ./tests
 ```
 
-## 📊 Output Format
+## Output Format
 
 
 ### File Naming Convention
@@ -221,7 +257,7 @@ eth_transactions_<short_address>_<timestamp>.csv
 ```
 Example: `eth_transactions_0x742d...5609_20240115_143022.csv`
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 The application supports the following environment variables:
