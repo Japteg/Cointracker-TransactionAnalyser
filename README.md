@@ -149,31 +149,6 @@ python main.py --address <ETHEREUM_ADDRESS>
 **Arguments:**
 - `--address`: Ethereum wallet address to analyze (required, must include 0x prefix)
 
-### Sample Output
-```
-INFO - Starting transaction analysis for address: 0x742d35Cc6634C0532925a3b8D698Ac2160c85609
-INFO - Initializing Etherscan API client...
-
----- Transaction type: NORMAL, Fetching batch 1 of transactions for 0x742d35Cc6634C0532925a3b8D698Ac2160c85609 ----
----- Completed fetching transactions of type: NORMAL, Fetched 150 transactions ----
-
----- Transaction type: ERC20, Fetching batch 1 of transactions for 0x742d35Cc6634C0532925a3b8D698Ac2160c85609 ----
----- Completed fetching transactions of type: ERC20, Fetched 75 transactions ----
-
-Starting transaction analysis...
-Processing 150 normal transactions
-Processing 75 erc20 transactions
-Successfully processed 225 total transactions
-
---------------------------------
-Export summary for 0x742d35Cc6634C0532925a3b8D698Ac2160c85609:
-- Total transactions: 225 (from 2020-01-15 10:30:45 to 2024-01-10 16:22:10)
-- Transaction types: {'ETH Transfer': 150, 'ERC-20 Transfer': 75}
-- Total gas fees: 0.045230 ETH
---------------------------------
-
-Transactions exported to: ./transaction_reports/eth_transactions_0x742d...85609_20240110_162230.csv
-```
 
 ## Docker Usage
 
@@ -265,5 +240,15 @@ The application supports the following environment variables:
 | Variable | Description | Required | Default |
 |----------|-------------|--------|---------|
 | `ETHERSCAN_API_KEY` | Your Etherscan API key | Yes | None |
+
+
+### Screenshots
+
+##### 200k+ Transactions 
+![Terminal Output - 200K+ Transactions](screenshots/large_dataset_output.png)
+
+
+#### Small number of Transactions
+![Terminal Output - Small Dataset](screenshots/small_dataset_output.png)
 
 ---
