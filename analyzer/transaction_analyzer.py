@@ -1,7 +1,5 @@
 import logging
 from typing import List, Dict, Any
-from datetime import datetime
-from decimal import Decimal, InvalidOperation
 
 from analyzer.base_transaction_analyzer import BaseTransactionAnalyzer
 from domain_models import (
@@ -16,7 +14,16 @@ logger = logging.getLogger(__name__)
 
 
 class EthereumTransactionAnalyzer(BaseTransactionAnalyzer):
-    """Analyzes and categorizes Ethereum transactions from various sources."""
+    """
+    Analyzes and categorizes Ethereum transactions from various sources.
+    Responsible for
+    - Assigning the correct transaction type
+    - Calculating gas fee
+    - Formatting date time
+    - Calculating value amount in eth
+    This class should implement all the processing and calculation logic.
+    The output can be used by exporter class to save the data
+    """
 
     # Standard transaction types
     TRANSACTION_TYPES_DISPLAY_NAMES = {
@@ -27,8 +34,9 @@ class EthereumTransactionAnalyzer(BaseTransactionAnalyzer):
         EthereumTransactionType.INTERNAL.value: "Internal Transfer",
     }
 
+    @staticmethod
     def _process_transaction(
-        self, tx: Dict[str, Any], transaction_type: str
+        tx: Dict[str, Any], transaction_type: str
     ) -> TransactionDomainModel:
         """
         Process an Ethereum transaction.

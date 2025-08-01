@@ -63,6 +63,7 @@ def main():
         logger.info("Initializing Etherscan API client...")
         etherscan_client = EtherscanApiClient(config.config["etherscan"]["api_key"])
 
+        # Get all the transaction data using the external client
         raw_data = etherscan_client.get_all_transactions(address=args.address)
 
         logger.info("Initializing transaction analyzer...")
@@ -71,7 +72,7 @@ def main():
 
         logger.info("Initializing CSV exporter...")
         exporter = CSVExporter()
-        export_path = exporter.export(processed_transactions.model_dump(), args.address)
+        export_path = exporter.export(processed_transactions, args.address)
 
         print(f"\nTransactions exported to: {export_path}")
         logger.info("Transaction analysis completed successfully")

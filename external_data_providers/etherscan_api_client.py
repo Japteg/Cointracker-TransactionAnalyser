@@ -38,6 +38,9 @@ class EtherscanApiClient(ExternalDataProviderBaseClient):
         transactions = []
         start_block = 0
         batch_number = 1
+
+        # We keep on retrieving all data in a paginated manner
+        # Break out of the loop when last page has been fetched
         while True:
             print(
                 f"---- Transaction type: {transaction_type.upper()}, Fetching batch {batch_number} of transactions for {address} ----"
@@ -78,6 +81,7 @@ class EtherscanApiClient(ExternalDataProviderBaseClient):
         try:
             results = {}
 
+            # Get data for all the defined transaction types
             for txn_type, action in self.TRANSACTION_ACTIONS.items():
                 results[txn_type] = self._get_transactions(address, action, txn_type)
 

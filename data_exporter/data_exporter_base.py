@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, List, Dict
 import logging
-import re
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -21,20 +20,9 @@ class DataExporterBase(ABC):
         """Export data to a file."""
         pass
 
-    def _sanitize_filename(self, filename: str) -> str:
-        """Sanitize filename to remove invalid characters."""
-        # Remove or replace invalid characters
-        sanitized = re.sub(r'[<>:"/\\|?*]', "_", filename)
-        # Remove multiple consecutive underscores
-        sanitized = re.sub(r"_{2,}", "_", sanitized)
-        # Remove leading/trailing underscores and dots
-        sanitized = sanitized.strip("_.")
-
-        return sanitized
-
-    def _validate_data(
-        self, transactions: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    # def _validate_data(
+    #     self, transactions: List[Dict[str, Any]]
+    # ) -> List[Dict[str, Any]]:
         """Validate and clean transaction data before export."""
         if not transactions:
             logger.warning("No transactions provided for validation")
@@ -42,6 +30,8 @@ class DataExporterBase(ABC):
 
         validated_transactions = []
 
+        # Can also be done as part of pydantic model
+        # Will be more efficient
         for i, tx in enumerate(transactions):
             try:
                 # Ensure all required columns exist

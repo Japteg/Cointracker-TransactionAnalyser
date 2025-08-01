@@ -2,9 +2,9 @@ import pandas as pd
 import csv
 import os
 import logging
-from typing import List, Dict, Any
 
 from data_exporter.data_exporter_base import DataExporterBase
+from domain_models import TransactionListDomainModel
 
 logger = logging.getLogger(__name__)
 
@@ -30,14 +30,8 @@ class CSVExporter(DataExporterBase):
     def __init__(self):
         super().__init__(self.CSV_COLUMNS)
 
-    def export(self, transactions: List[Dict[str, Any]], address: str) -> str:
+    def export(self, transactions: TransactionListDomainModel, address: str) -> str:
         """Export transactions to CSV file."""
-        if not transactions:
-            raise ValueError("No transactions provided for export")
-
-        # Validate transaction data
-        validated_transactions = self._validate_data(transactions)
-
         # Prepare output directory
         output_directory_path = f"./{self.OUTPUT_DIRECTORY}"
         os.makedirs(output_directory_path, exist_ok=True)
@@ -48,7 +42,8 @@ class CSVExporter(DataExporterBase):
 
         try:
             # Convert to DataFrame
-            df = pd.DataFrame(validated_transactions)
+            # df = pd.DataFrame(validated_transactions)
+            df = pd.DataFrame(transactions.model_dump())
 
             # Ensure columns are in the correct order
             df = df.reindex(columns=self.CSV_COLUMNS, fill_value="")
@@ -59,7 +54,7 @@ class CSVExporter(DataExporterBase):
             )
 
             logger.info(
-                f"Successfully exported {len(validated_transactions)} transactions to ./{self.OUTPUT_DIRECTORY}/{filename}"
+                f"Successfully exported {len(transactions.root)} transactions to ./{self.OUTPUT_DIRECTORY}/{filename}"
             )
 
             # Log summary statistics
@@ -96,13 +91,17 @@ class CSVExporter(DataExporterBase):
                         0
                     )
                     total_gas_fees = gas_fees.sum()
-                except:
-                    pass
+                except Exception as err:
+                    logger.warning(f"Error calculating total gas fee. Error: {err}")
 
+            # All these print statements can be extracted out to a common utility
+            # but not doing that for now due to time constraints
             print("\n\n--------------------------------")
             print(f"Export summary for {address}:")
             print(f"- Total transactions: {total_transactions}{date_range}")
-            print(f"- Transaction types: {type_counts}")
+            print(f"- Transaction types:")
+            for txn_type, count in type_counts.items():
+                print(f"   -{txn_type}: {count}")
             print(f"- Total gas fees: {total_gas_fees:.6f} ETH")
             print("--------------------------------\n\n")
 
