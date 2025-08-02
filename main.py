@@ -6,7 +6,7 @@ import re
 
 from analyzer.transaction_analyzer import EthereumTransactionAnalyzer
 from data_exporter.csv_exporter import CSVExporter
-from services.contracker_service import CoinTrackerService
+from services.cointracker_service import CoinTrackerService
 
 # Add the current directory to Python path for imports
 sys.path.insert(0, str(Path(__file__).parent))
