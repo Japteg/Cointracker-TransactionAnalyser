@@ -6,6 +6,7 @@ import re
 
 from analyzer.transaction_analyzer import EthereumTransactionAnalyzer
 from data_exporter.csv_exporter import CSVExporter
+from services.contracker_service import CoinTrackerService
 
 # Add the current directory to Python path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -60,22 +61,14 @@ def main():
 
         logger.info(f"Starting transaction analysis for address: {args.address}")
 
-        logger.info("Initializing Etherscan API client...")
-        etherscan_client = EtherscanApiClient(config.config["etherscan"]["api_key"])
+        # Initialize the CoinTrackerService
+        coin_tracker_service = CoinTrackerService(
+            data_provider_client=EtherscanApiClient(config.config["etherscan"]["api_key"]),
+            transaction_analyzer=EthereumTransactionAnalyzer(),
+            data_exporter=CSVExporter()
+        )
+        coin_tracker_service.generate_transaction_report(args.address)
 
-        # Get all the transaction data using the external client
-        raw_data = etherscan_client.get_all_transactions(address=args.address)
-
-        logger.info("Initializing transaction analyzer...")
-        analyzer = EthereumTransactionAnalyzer()
-        processed_transactions = analyzer.analyze(raw_data)
-
-        logger.info("Initializing CSV exporter...")
-        exporter = CSVExporter()
-        export_path = exporter.export(processed_transactions, args.address)
-
-        print(f"\nTransactions exported to: {export_path}")
-        logger.info("Transaction analysis completed successfully")
         return 0
 
     except Exception as e:
